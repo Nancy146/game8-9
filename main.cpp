@@ -18,7 +18,7 @@
 
 using namespace std;
 
-// Function to display the available numbers for a player
+// Function to display the available numbers of players
 void display_available_numbers(const vector<int>& numbers) {
     cout << "Available numbers: ";
     for (int num : numbers) {
