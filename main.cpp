@@ -8,7 +8,6 @@
 #include "SUS_GAME.h"
 #include "Ultimate_X_O.h"
 #include "5x5X_O.h"
-//#include "MinMaxPlayer.h"
 #include "MisereTicTacToe.h"
 #include <vector>
 #include <algorithm>
@@ -85,118 +84,66 @@ int PyramicTicTacToe(){
     }
     return 0;
 }
-void connectFour(){
-    ConnectFourBoard<char> board;
+int connectFour(){
+    int choice;
+    Player<char>* players[2];
+    ConnectFourBoard<char>* B = new ConnectFourBoard<char>();
 
-    // Ask for player details
-    cout << "Welcome to Connect Four!\n";
+    string playerXName, player2Name;
 
-    // Set up Player 1
-    string player1_name;
-    cout << "Enter Player 1's name: ";
-    cin >> player1_name;
-    ConnectFourPlayer<char> player1(player1_name, 'X');
-    player1.setBoard(&board); // Attach the board to Player 1
+    cout << " ** Welcome to FCAI Connect 4 Board Game ** \n";
 
-    // Set up Player 2 (Human or Computer)
-    string choice;
-    cout << "Do you want to play against a computer? (yes/no): ";
+    // Set up player 1
+    cout << "Enter Player X name: ";
+    cin >> playerXName;
+    cout << "Choose Player X type:\n";
+    cout << "1. Human\n";
+    cout << "2. Random Computer\n";
     cin >> choice;
 
-    ConnectFourPlayer<char>* player2_human = nullptr;
-    ConnectFourRandomPlayer<char>* player2_computer = nullptr;
-
-    if (choice == "yes") {
-        player2_computer = new ConnectFourRandomPlayer<char>('O');
-        player2_computer->setBoard(&board); // Attach the board to the computer player
-    } else {
-        string player2_name;
-        cout << "Enter Player 2's name: ";
-        cin >> player2_name;
-        player2_human = new ConnectFourPlayer<char>(player2_name, 'O');
-        player2_human->setBoard(&board); // Attach the board to Player 2
-    }
-
-    cout << "\nLet's begin the game!\n";
-
-    // Main game loop
-    bool game_over = false;
-    while (!game_over) {
-        // Display the board
-        board.display_board();
-
-        // Player 1's turn
-        cout << player1.getname() << "'s turn (X): \n";
-        int column, ignored;
-        player1.getmove(column, ignored);
-
-        // Validate and update Player 1's move
-        while (!board.update_board(column, ignored, 'X')) {
-            cout << "Invalid move. Try again.\n";
-            player1.getmove(column, ignored);
-        }
-
-        // Check for game over after Player 1's move
-        if (board.game_is_over()) {
-            game_over = true;
-            board.display_board();
-            if (board.is_win()) {
-                cout << player1.getname() << " wins! Congratulations!\n";
-            } else {
-                cout << "It's a draw!\n";
-            }
+    switch(choice) {
+        case 1:
+            players[0] = new ConnectFourPlayer<char>(playerXName, 'X');
             break;
-        }
-
-        // Display the board again before Player 2's turn
-        board.display_board();
-
-        // Player 2's turn
-        if (player2_human) {
-            cout << player2_human->getname() << "'s turn (O): \n";
-            player2_human->getmove(column, ignored);
-        } else {
-            cout << "Computer's turn (O): \n";
-            player2_computer->getmove(column, ignored);
-            cout << "Computer chose column " << column + 1 << ".\n";
-        }
-
-        // Validate and update Player 2's move
-        while (!board.update_board(column, ignored, 'O')) {
-            cout << "Invalid move. Try again.\n";
-            if (player2_human) {
-                player2_human->getmove(column, ignored);
-            } else {
-                player2_computer->getmove(column, ignored);
-                cout << "Computer chose column " << column + 1 << ".\n";
-            }
-        }
-
-        // Check for game over after Player 2's move
-        if (board.game_is_over()) {
-            game_over = true;
-            board.display_board();
-            if (board.is_win()) {
-                if (player2_human) {
-                    cout << player2_human->getname() << " wins! Congratulations!\n";
-                } else {
-                    cout << "Computer wins! Better luck next time.\n";
-                }
-            } else {
-                cout << "It's a draw!\n";
-            }
-        }
+        case 2:
+            players[0] = new ConnectFourRandomPlayer<char>('X');
+            break;
+        default:
+            cout << "Invalid choice for Player 1. Exiting the game.\n";
+            return 1;
     }
 
-    // Clean up dynamically allocated memory
-    if (player2_human) {
-        delete player2_human;
-    }
-    if (player2_computer) {
-        delete player2_computer;
+    // Set up player 2
+    cout << "Enter Player 2 name: ";
+    cin >> player2Name;
+    cout << "Choose Player 2 type:\n";
+    cout << "1. Human\n";
+    cout << "2. Random Computer\n";
+    cin >> choice;
+
+    switch(choice) {
+        case 1:
+            players[1] = new ConnectFourPlayer<char>(player2Name, 'O');
+            break;
+        case 2:
+            players[1] = new ConnectFourRandomPlayer<char>('O');
+            break;
+        default:
+            cout << "Invalid choice for Player 2. Exiting the game.\n";
+            return 1;
     }
 
-    cout << "Thank you for playing Connect Four!\n";
+    // Create the game manager and run the game
+    GameManager<char> connect4game(B, players);
+    connect4game.run();
+
+    // Clean up
+    delete B;
+    for (int i = 0; i < 2; ++i) {
+        delete players[i];
+    }
+
+    return 0;
 }
 int FivexFiveTicTacToe(){
     int choice;
@@ -469,79 +416,71 @@ void NumericalTicTacToe(){
     delete player2;
 }
 int MisereTicTacToe(){
-//    int choice;
-//    Player<char>* players[2];
-//    MisereTicTacToeBoard<char>* board = new MisereTicTacToeBoard<char>();
-//    string player1Name, player2Name;
-//
-//    cout << "Welcome to Misere Tic Tac Toe!\n";
-//    cout << "=== RULES ===\n";
-//    cout << "1. Players take turns placing their marks (X or O) on the board\n";
-//    cout << "2. The goal is to AVOID getting three marks in a row\n";
-//    cout << "3. If you make three in a row (horizontally, vertically, or diagonally), YOU LOSE!\n";
-//    cout << "4. If the board fills up with no three in a row, it's a draw\n\n";
-//
-//    // Set up player 1
-//    cout << "Enter Player 1 name: ";
-//    cin >> player1Name;
-//    cout << "Choose Player 1 type:\n";
-//    cout << "1. Human\n";
-//    cout << "2. Random Computer\n";
-//    cout << "3. Smart Computer (AI)\n";
-//    cin >> choice;
-//
-//    switch (choice) {
-//        case 1:
-//            players[0] = new MisereTicTacToePlayer<char>(player1Name, 'X');
-//            break;
-//        case 2:
-//            players[0] = new MisereTicTacToeRandomPlayer<char>('X');
-//            players[0]->setBoard(board);
-//            break;
-//        case 3:
-//            players[0] = new X_O_MinMax_Player<char>('X');
-//            players[0]->setBoard(board);
-//            break;
-//        default:
-//            cout << "Invalid choice. Exiting game.\n";
-//            return 1;
-//    }
-//
-//    // Set up player 2
-//    cout << "Enter Player 2 name: ";
-//    cin >> player2Name;
-//    cout << "Choose Player 2 type:\n";
-//    cout << "1. Human\n";
-//    cout << "2. Random Computer\n";
-//    cout << "3. Smart Computer (AI)\n";
-//    cin >> choice;
-//
-//    switch (choice) {
-//        case 1:
-//            players[1] = new MisereTicTacToePlayer<char>(player2Name, 'O');
-//            break;
-//        case 2:
-//            players[1] = new MisereTicTacToeRandomPlayer<char>('O');
-//            players[1]->setBoard(board);
-//            break;
-//        case 3:
-//            players[1] = new X_O_MinMax_Player<char>('O');
-//            players[1]->setBoard(board);
-//            break;
-//        default:
-//            cout << "Invalid choice. Exiting game.\n";
-//            return 1;
-//    }
-//
-//    GameManager<char> game(board, players);
-//    game.run();
-//
-//    // Cleanup
-//    delete board;
-//    delete players[0];
-//    delete players[1];
-//
-//    return 0;
+    int choice;
+    Player<char>* players[2];
+    MisereTicTacToeBoard<char>* board = new MisereTicTacToeBoard<char>();
+    string player1Name, player2Name;
+
+    cout << "Welcome to Misere Tic Tac Toe!\n";
+    cout << "=== RULES ===\n";
+    cout << "1. Players take turns placing their marks (X or O) on the board\n";
+    cout << "2. The goal is to AVOID getting three marks in a row\n";
+    cout << "3. If you make three in a row (horizontally, vertically, or diagonally), YOU LOSE!\n";
+    cout << "4. If the board fills up with no three in a row, it's a draw\n\n";
+
+    // Set up player 1
+    cout << "Enter Player 1 name: ";
+    cin >> player1Name;
+    cout << "Choose Player 1 type:\n";
+    cout << "1. Human\n";
+    cout << "2. Random Computer\n";
+    cin >> choice;
+
+    switch (choice) {
+        case 1:
+            players[0] = new MisereTicTacToePlayer<char>(player1Name, 'X');
+            break;
+        case 2:
+            players[0] = new MisereTicTacToeRandomPlayer<char>('X');
+            players[0]->setBoard(board);
+            break;
+
+        default:
+            cout << "Invalid choice. Exiting game.\n";
+            return 1;
+    }
+
+    // Set up player 2
+    cout << "Enter Player 2 name: ";
+    cin >> player2Name;
+    cout << "Choose Player 2 type:\n";
+    cout << "1. Human\n";
+    cout << "2. Random Computer\n";
+    cin >> choice;
+
+    switch (choice) {
+        case 1:
+            players[1] = new MisereTicTacToePlayer<char>(player2Name, 'O');
+            break;
+        case 2:
+            players[1] = new MisereTicTacToeRandomPlayer<char>('O');
+            players[1]->setBoard(board);
+            break;
+
+        default:
+            cout << "Invalid choice. Exiting game.\n";
+            return 1;
+    }
+
+    GameManager<char> game(board, players);
+    game.run();
+
+    // Cleanup
+    delete board;
+    delete players[0];
+    delete players[1];
+
+    return 0;
 }
 int FourxFourTicTacToe(){
     int choice;
@@ -559,7 +498,7 @@ int FourxFourTicTacToe(){
     cout << "2. Random Computer\n";
     cin >> choice;
 
-    switch(choice) {
+    switch (choice) {
         case 1:
             players[0] = new X_OPlayer<char>(playerXName, 'X');
             break;
@@ -579,7 +518,7 @@ int FourxFourTicTacToe(){
     cout << "2. Random Computer\n";
     cin >> choice;
 
-    switch(choice) {
+    switch (choice) {
         case 1:
             players[1] = new X_OPlayer<char>(player2Name, 'O');
             break;
@@ -603,10 +542,12 @@ int FourxFourTicTacToe(){
         // Get the move
         players[currentPlayer]->getmove(x, y);
 
-        // Update the board and validate the move
-        if (!B->update_board(x, y, players[currentPlayer]->getsymbol())) {
-            cout << "Invalid move! Try again.\n";
-            continue; // Retry the same player's turn
+        // Update the board only if the player is human
+        if (dynamic_cast<X_OPlayer<char>*>(players[currentPlayer])) {
+            if (!B->update_board(x, y, players[currentPlayer]->getsymbol())) {
+                cout << "Invalid move! Try again.\n";
+                continue; // Retry the same player's turn
+            }
         }
 
         // Switch to the next player
@@ -759,16 +700,16 @@ int SUS(){
 
 int main() {
     while(true){
-        cout << "welcome to tic tac toa games :)\nchoose the game you want to play\n"
+        cout << "\nwelcome to tic tac toa games :)\nchoose the game you want to play\n"
              <<"1- Pyramic Tic-Tac-Toe\n"
-               "2- Four-in-a-row\n"
+               "2- connect Four \n"
                "3- 5 x 5 Tic Tac Toe\n"
                "4- Word Tic-tac-toe\n"
                "5- Numerical Tic-Tac-Toe\n"
                "6- Misere Tic Tac Toe\n"
                "7- 4x4 Tic-Tac-Toe\n"
                "8- Ultimate Tic Tac Toe\n"
-               "9- SUS word\n"
+               "9- SUS word Tic Tac Toe\n"
                "10- Exit\n"
                "choose a number please: ";
         int c;
@@ -801,9 +742,10 @@ int main() {
             SUS();
         }
         else if(c == 10){
+            cout << "thanks for using our program :)\n";
             break;
         }else{
-            cout << "invalid input please enter the number of the game you want to try\n";
+            cout << "invalid input! please enter a valid number\n";
             continue;
         }
     }
@@ -811,12 +753,6 @@ int main() {
 
     return 0;
 }
-
-
-
-
-
-
 
 
 
